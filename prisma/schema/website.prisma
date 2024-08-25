@@ -1,0 +1,305 @@
+model HomeSection {
+  id          String        @id @default(uuid())
+  title       String        @db.VarChar(100)
+  description String
+  for         HomeEnum      @unique()
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  features    HomeFeature[]
+
+  @@map("homesection")
+}
+
+model HomeFeature {
+  id          String      @id @default(uuid())
+  sectionId   String
+  title       String      @db.VarChar(100)
+  description String
+  image       String?     @db.VarChar(200)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  section     HomeSection @relation(fields: [sectionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("homefeature")
+}
+
+model HomeCustomerReview {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(100)
+  designation String   @db.VarChar(100)
+  society     String   @db.VarChar(100)
+  location    String   @db.VarChar(100)
+  description String
+  image       String?  @db.VarChar(200)
+  featured    Boolean  @default(false)
+  archive     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("homecustomerreview")
+}
+
+model WhyUsSection {
+  id        String      @id @default(uuid())
+  title     String?     @db.VarChar(100)
+  type      HomeEnum    @unique()
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  cards     WhyUsCard[]
+
+  @@map("whyussection")
+}
+
+model WhyUsCard {
+  id          String       @id @default(uuid())
+  sectionId   String
+  title       String       @db.VarChar(100)
+  description String
+  image       String?      @db.VarChar(200)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  section     WhyUsSection @relation(fields: [sectionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("whyuscard")
+}
+
+model ResidentFeatureSection {
+  id        String            @id @default(uuid())
+  title     String            @db.VarChar(100)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  features  ResidentFeature[]
+
+  @@map("residentfeaturesection")
+}
+
+model ResidentFeature {
+  id          String                 @id @default(uuid())
+  sectionId   String
+  title       String                 @db.VarChar(100)
+  description String
+  image       String?                @db.VarChar(200)
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  section     ResidentFeatureSection @relation(fields: [sectionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("residentfeature")
+}
+
+model NPCSection {
+  id          String       @id @default(uuid())
+  type        NPCEnum
+  for         SocietyEnum
+  title       String       @db.VarChar(100)
+  description String
+  image       String?      @db.VarChar(200)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  features    NPCFeature[]
+
+  @@unique([type, for])
+  @@map("npcsection")
+}
+
+model NPCFeature {
+  id          String     @id @default(uuid())
+  sectionId   String
+  description String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  section     NPCSection @relation(fields: [sectionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("npcfeature")
+}
+
+model VideoSection {
+  id        String    @id @default(uuid())
+  title     String?   @db.VarChar(100)
+  type      VideoEnum @unique()
+  video     String?   @db.VarChar(200)
+  fileName  String?   @db.VarChar(100)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("videosection")
+}
+
+model TeamMember {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(100)
+  designation String   @db.VarChar(100)
+  image       String?  @db.VarChar(200)
+  featured    Boolean  @default(false)
+  archive     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("teammember")
+}
+
+model AboutUsStory {
+  id          String   @id @default(uuid())
+  title       String   @db.VarChar(100)
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("aboutusstory")
+}
+
+model AboutUsService {
+  id          String   @id @default(uuid())
+  title       String   @db.VarChar(100)
+  description String
+  image       String?  @db.VarChar(200)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("aboutusservice")
+}
+
+model BlogCategory {
+  id          String      @id @default(uuid())
+  title       String      @unique
+  createdBy   SuperAdmin? @relation("SuperAdminBlogCategoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  createdById String?
+  updatedBy   SuperAdmin? @relation("SuperAdminBlogCategoryUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  updatedById String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  blogs       Blog[]
+
+  @@index([title])
+  @@map("blogcategory")
+}
+
+model BlogTag {
+  id          String      @id @default(uuid())
+  title       String      @unique
+  createdBy   SuperAdmin? @relation("SuperAdminBlogTagCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  createdById String?
+  updatedBy   SuperAdmin? @relation("SuperAdminBlogTagUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  updatedById String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  blogs       Blog[]      @relation("blogtoblogtag")
+
+  @@index([title])
+  @@map("blogtag")
+}
+
+model Blog {
+  id          String         @id @default(uuid())
+  title       String
+  slug        String         @unique
+  description String?
+  content     String?        @db.Text
+  status      BlogStatusEnum @default(draft)
+  category    BlogCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId  String?
+  tags        BlogTag[]      @relation("blogtoblogtag")
+  cover       String?
+  archive     Boolean        @default(false)
+  featured    Boolean        @default(false)
+  publishDate DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  createdBy   SuperAdmin?    @relation("SuperAdminBlogCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdById String?
+  updatedBy   SuperAdmin?    @relation("SuperAdminBlogUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedById String?
+
+  @@index([title, slug])
+  @@map("blog")
+}
+
+model ManagementStatisticSection {
+  id          String                       @id @default(uuid())
+  title       String                       @db.VarChar(100)
+  description String
+  createdAt   DateTime                     @default(now())
+  updatedAt   DateTime                     @updatedAt
+  features    ManagementStatisticFeature[]
+
+  @@map("managementstatisticsection")
+}
+
+model ManagementStatisticFeature {
+  id          String                     @id @default(uuid())
+  sectionId   String
+  title       String                     @db.VarChar(100)
+  description String
+  image       String?                    @db.VarChar(200)
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+  section     ManagementStatisticSection @relation(fields: [sectionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("managementstatisticfeature")
+}
+
+model ResidentManagementSection {
+  id          String                      @id @default(uuid())
+  type        ManagementPlatformTypeEnum  @unique
+  title       String                      @db.VarChar(100)
+  description String
+  image       String?                     @db.VarChar(200)
+  createdAt   DateTime                    @default(now())
+  updatedAt   DateTime                    @updatedAt
+  features    ResidentManagementFeature[]
+
+  @@map("residentmanagementsection")
+}
+
+model ResidentManagementFeature {
+  id          String                    @id @default(uuid())
+  sectionId   String
+  description String
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+  section     ResidentManagementSection @relation(fields: [sectionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("residentmanagementfeature")
+}
+
+model ContactUs {
+  id           String                  @id @default(uuid())
+  fullName     String                  @db.VarChar(100)
+  email        String                  @db.VarChar(100)
+  number       String                  @db.VarChar(15)
+  societyName  String                  @db.VarChar(100)
+  message      String
+  role         ContactUsRoleEnum
+  status       ContactUsStatusEnum     @default(pending)
+  archive      Boolean                 @default(false)
+  // createdAt    DateTime                @default(dbgenerated("CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kathmandu'"))
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt()
+  activityLogs SuperAdminActivityLog[]
+
+  @@map("contactus")
+}
+
+model FAQ {
+  id        String      @id @default(uuid())
+  for       FAQTypeEnum
+  question  String      @db.VarChar(120)
+  answer    String      @db.Text
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@map("faq")
+}
+
+model LegalCompliance {
+  id          String                  @id @default(uuid())
+  type        LegalComplianceTypeEnum @unique
+  content     String?                 @db.Text
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  createdBy   SuperAdmin?             @relation("SuperAdminLegalComplianceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  createdById String?
+  updatedBy   SuperAdmin?             @relation("SuperAdminLegalComplianceUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  updatedById String?
+
+  @@map("legalcompliance")
+}

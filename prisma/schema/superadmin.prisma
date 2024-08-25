@@ -1,0 +1,248 @@
+model SuperAdminRole {
+  id          String                 @id @default(uuid())
+  name        String
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  createdById String?
+  updatedById String?
+  archive     Boolean                @default(false)
+  users       SuperAdmin[]
+  permissions SuperAdminPermission[]
+  createdBy   SuperAdmin?            @relation("SuperAdminRoleCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   SuperAdmin?            @relation("SuperAdminRoleUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("superadminrole")
+}
+
+model SuperAdminPermission {
+  id        String          @id @default(uuid())
+  name      String
+  access    AccessRightEnum
+  children  String[]
+  roleId    String
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  role      SuperAdminRole  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@map("superadminpermission")
+}
+
+model SuperAdmin {
+  id                      String                  @id @default(uuid())
+  name                    String
+  gender                  UserGenderEnum
+  contact                 String
+  email                   String                  @unique
+  password                String
+  dob                     DateTime
+  token                   String[]
+  archive                 Boolean                 @default(false)
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  roleId                  String
+  createdById             String?
+  updatedById             String?
+  blockedToken            String?
+  adminPopUpBannerCreated AdminPopUpBanner[]      @relation("AdminPopUpBannerCreatedBy")
+  adminPopUpBannerUpdated AdminPopUpBanner[]      @relation("AdminPopUpBannerUpdatedBy")
+  apartmentCreated        Apartment[]             @relation("ApartmentCreatedBy")
+  apartmentUpdated        Apartment[]             @relation("ApartmentUpdatedBy")
+  colorCreated            Color[]                 @relation("ColorCreatedBy")
+  colorUpdated            Color[]                 @relation("ColorUpdatedBy")
+  settingCreated          DocumentSetting[]       @relation("settingCreatedBy")
+  settingUpdated          DocumentSetting[]       @relation("settingUpdatedBy")
+  image                   File?
+  problemChanged          Problem[]               @relation("problemChangedBy")
+  subscriptionAdded       Subscription[]          @relation("subscriptionExpiredBy")
+  subscriptionUpdated     Subscription[]          @relation("subscriptionUpdatedBy")
+  createdBy               SuperAdmin?             @relation("SuperAdminCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  superAdminCreated       SuperAdmin[]            @relation("SuperAdminCreatedBy")
+  role                    SuperAdminRole          @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  updatedBy               SuperAdmin?             @relation("SuperAdminUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  superAdminUpdated       SuperAdmin[]            @relation("SuperAdminUpdatedBy")
+  superAdminActivityLogs  SuperAdminActivityLog[] @relation("SuperAdminActivityLogCreatedBy")
+  usersCreated            SuperAdminRole[]        @relation("SuperAdminRoleCreatedBy")
+  usersUpdated            SuperAdminRole[]        @relation("SuperAdminRoleUpdatedBy")
+  blogCreated             Blog[]                  @relation("SuperAdminBlogCreatedBy")
+  blogUpdated             Blog[]                  @relation("SuperAdminBlogUpdatedBy")
+  blogCategoriesCreated   BlogCategory[]          @relation("SuperAdminBlogCategoryCreatedBy")
+  blogCategoriesUpdated   BlogCategory[]          @relation("SuperAdminBlogCategoryUpdatedBy")
+  blogTagsCreated         BlogTag[]               @relation("SuperAdminBlogTagCreatedBy")
+  blogTagsUpdated         BlogTag[]               @relation("SuperAdminBlogTagUpdatedBy")
+  legalCompliancesCreated LegalCompliance[]       @relation("SuperAdminLegalComplianceCreatedBy")
+  legalCompliancesUpdated LegalCompliance[]       @relation("SuperAdminLegalComplianceUpdatedBy")
+
+  @@map("superadmin")
+}
+
+model Subscription {
+  id           String                @id @default(uuid())
+  type         PackageTypeEnum
+  endAt        DateTime
+  price        Float?
+  time         PaymentTimeEnum?
+  pattern      PaymentPatternEnum?
+  apartmentId  String
+  status       SubscriptionStatus    @default(active)
+  expireReason String?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  expiredById  String?
+  updatedById  String?
+  paid         Float?
+  remaining    Float?
+  active       Boolean               @default(true)
+  apartment    Apartment             @relation("subscriptionApartmentRelation", fields: [apartmentId], references: [id], onDelete: Cascade)
+  expiredBy    SuperAdmin?           @relation("subscriptionExpiredBy", fields: [expiredById], references: [id], onDelete: SetNull)
+  updatedBy    SuperAdmin?           @relation("subscriptionUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  history      SubscriptionHistory[]
+
+  @@map("subscription")
+}
+
+model SubscriptionHistory {
+  id             String       @id @default(uuid())
+  subscriptionId String
+  paid           Float
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptionhistory")
+}
+
+model DocumentSetting {
+  id          String         @id @default(uuid())
+  name        String
+  createdAt   DateTime       @default(now())
+  createdById String?
+  updatedAt   DateTime       @updatedAt
+  updatedById String?
+  archive     Boolean        @default(false)
+  files       DocumentFile[]
+  createdBy   SuperAdmin?    @relation("settingCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   SuperAdmin?    @relation("settingUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("documentsetting")
+}
+
+model DocumentFile {
+  id                String           @id @default(uuid())
+  url               String
+  name              String?
+  documentSettingId String?
+  uploadedForId     String?
+  documentSetting   DocumentSetting? @relation(fields: [documentSettingId], references: [id], onDelete: SetNull)
+  uploadedFor       AdminUser?       @relation(fields: [uploadedForId], references: [id], onDelete: Cascade)
+
+  @@map("documentfile")
+}
+
+model Color {
+  id          String      @id @default(uuid())
+  name        String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  createdById String?
+  updatedById String?
+  apartment   Apartment[]
+  createdBy   SuperAdmin? @relation("ColorCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   SuperAdmin? @relation("ColorUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("color")
+}
+
+model SuperAdminActivityLog {
+  id                String      @id @default(uuid())
+  name              String
+  message           String
+  type              String
+  createdById       String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  contactUsId       String?
+  contactUsActivity ContactUs?  @relation(fields: [contactUsId], references: [id], onDelete: SetNull)
+  createdBy         SuperAdmin? @relation("SuperAdminActivityLogCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@map("superadminactivitylog")
+}
+
+model SuperAdminNotification {
+  id        String                     @id @default(uuid())
+  message   String
+  type      SuperAdminNotificationEnum
+  read      Boolean                    @default(false)
+  createdAt DateTime                   @default(now())
+  updatedAt DateTime                   @updatedAt
+
+  @@map("superadminnotification")
+}
+
+model AdminPopUpBanner {
+  id           String                 @id @default(uuid())
+  title        String
+  activated    Boolean                @default(false)
+  webImage     String?
+  mobImage     String?
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  createdById  String?
+  updatedById  String?
+  enabled      Boolean                @default(false)
+  redirectLink String?
+  createdBy    SuperAdmin?            @relation("AdminPopUpBannerCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy    SuperAdmin?            @relation("AdminPopUpBannerUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  apartments   ApartmentPopUpBanner[]
+
+  @@map("adminpopupbanner")
+}
+
+model Feedback {
+  id          String     @id @default(uuid())
+  message     String
+  apartmentId String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdById String?
+  updatedById String?
+  apartment   Apartment  @relation("feedbackApartmentRelation", fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser? @relation("feedbackCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   AdminUser? @relation("feedbackUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  attachments File[]
+
+  @@map("feedback")
+}
+
+model Problem {
+  id          String        @id @default(uuid())
+  topic       String
+  message     String
+  apartmentId String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  createdById String?
+  status      ProblemStatus @default(pending)
+  updatedById String?
+  attachments File[]
+  apartment   Apartment     @relation("problemApartmentRelation", fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser?    @relation("problemCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   SuperAdmin?   @relation("problemChangedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("problem")
+}
+
+model ClientProblem {
+  id          String        @id @default(uuid())
+  message     String
+  apartmentId String
+  problemId   String
+  status      ProblemStatus @default(pending)
+  createdById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  attachments File[]
+  apartment   Apartment     @relation("ClientProblemApartmentRelation", fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy   ClientUser?   @relation("ProblemCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@map("clientproblem")
+}

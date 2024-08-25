@@ -1,0 +1,466 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder", "omitApi", "fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Folder {
+  id          String           @id @default(uuid())
+  apartmentId String
+  name        String
+  type        FolderTypeEnum
+  parentId    String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  archive     Boolean          @default(false)
+  access      FolderAccessEnum
+  createdById String?
+  updatedById String?
+  files       File[]
+  apartment   Apartment        @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser?       @relation("AdminFolderCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  parent      Folder?          @relation("ParentChildrenRelation", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Folder[]         @relation("ParentChildrenRelation")
+  updatedBy   AdminUser?       @relation("AdminFolderUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("folder")
+}
+
+model File {
+  id                    String                @id @default(uuid())
+  type                  FileTypeEnum          @default(image)
+  url                   String
+  name                  String?
+  folderId              String?
+  adminUserId           String?               @unique
+  clientUserId          String?               @unique
+  documentClientUserId  String?               @unique
+  clientStaffId         String?               @unique
+  documentClientStaffId String?               @unique
+  serviceProviderId     String?               @unique
+  petId                 String?               @unique
+  vehicleId             String?               @unique
+  adminServiceId        String?               @unique
+  guardUserId           String?               @unique
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  superAdminId          String?               @unique
+  maintenanceId         String?
+  maintenanceCommentId  String?               @unique
+  createdById           String?
+  feedbackId            String?
+  serviceTypeId         String?               @unique
+  amenityId             String?               @unique
+  noticeId              String?
+  documentTypeId        String?
+  problemId             String?
+  clientProblemId       String?
+  documentFileClientId  String?
+  vehicleListId         String?               @unique
+  adminService          AdminService?         @relation(fields: [adminServiceId], references: [id], onDelete: SetNull)
+  adminUser             AdminUser?            @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+  amenity               Amenity?              @relation(fields: [amenityId], references: [id], onDelete: SetNull)
+  createdBy             AdminUser?            @relation("FileCreatedByAdmin", fields: [createdById], references: [id], onDelete: SetNull)
+  documentFileClient    DocumentFileClient?   @relation(fields: [documentFileClientId], references: [id], onDelete: SetNull)
+  documentType          DocumentType?         @relation(fields: [documentTypeId], references: [id], onDelete: SetNull)
+  feedback              Feedback?             @relation(fields: [feedbackId], references: [id], onDelete: SetNull)
+  folder                Folder?               @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  guardUser             GuardUser?            @relation(fields: [guardUserId], references: [id], onDelete: SetNull)
+  maintenanceComment    MaintenanceComment?   @relation(fields: [maintenanceCommentId], references: [id], onDelete: SetNull)
+  maintenance           Maintenance?          @relation(fields: [maintenanceId], references: [id], onDelete: SetNull)
+  notice                Notice?               @relation(fields: [noticeId], references: [id], onDelete: SetNull)
+  pet                   Pet?                  @relation(fields: [petId], references: [id], onDelete: SetNull)
+  problem               Problem?              @relation(fields: [problemId], references: [id], onDelete: SetNull)
+  serviceProvider       ServiceProvider?      @relation(fields: [serviceProviderId], references: [id], onDelete: SetNull)
+  serviceType           ServiceType?          @relation(fields: [serviceTypeId], references: [id], onDelete: SetNull)
+  superAdmin            SuperAdmin?           @relation(fields: [superAdminId], references: [id], onDelete: SetNull)
+  vehicle               Vehicle?              @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  vehicleList           VehicleList?          @relation(fields: [vehicleListId], references: [id], onDelete: SetNull)
+  documentClientUser    ClientUser?           @relation("ClientDocumentRelation", fields: [documentClientUserId], references: [id], onDelete: SetNull, map: "client_document_constraint")
+  clientUser            ClientUser?           @relation("ClientImageRelation", fields: [clientUserId], references: [id], onDelete: SetNull, map: "client_image_constraint")
+  documentClientStaff   ClientStaff?          @relation("ClientStaffDocumentRelation", fields: [documentClientStaffId], references: [id], onDelete: SetNull, map: "clientstaff_document_constraint")
+  clientStaff           ClientStaff?          @relation("ClientStaffImageRelation", fields: [clientStaffId], references: [id], onDelete: SetNull, map: "clientstaff_image_constraint")
+  apartmentClientUsers  ApartmentClientUser[] @relation("apartmentclientusertofile")
+  clientProblem         ClientProblem?        @relation(fields: [clientProblemId], references: [id], onDelete: SetNull)
+
+  @@map("file")
+}
+
+model ApartmentPopUpBanner {
+  apartmentId String
+  bannerId    String
+  assignedAt  DateTime         @default(now())
+  apartment   Apartment        @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  banner      AdminPopUpBanner @relation(fields: [bannerId], references: [id], onDelete: Cascade)
+
+  @@id([apartmentId, bannerId])
+  @@map("apartmentpopupbanner")
+}
+
+model Apartment {
+  id                     String                   @id @default(uuid())
+  name                   String?                  @unique
+  country                String?
+  province               String?
+  city                   String?
+  area                   String?
+  postalcode             String?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  createdById            String?
+  updatedById            String?
+  status                 ApartmentStatus          @default(active)
+  subscription           PayStatus                @default(paid)
+  lastUsed               DateTime?
+  colorId                String?
+  mainUser               String                   @unique
+  adminActivityLogs      AdminActivityLog[]       @relation("AdminActivityLogApartmentRelation")
+  adminAttendances       AdminAttendance[]
+  adminNotifications     AdminNotification[]
+  adminRoles             AdminRole[]
+  adminServices          AdminService[]
+  adminServiceAttendance AdminServiceAttendance[]
+  adminServiceRoles      AdminServiceRole[]
+  adminServiceShifts     AdminServiceShift[]
+  AdminShift             AdminShift[]
+  adminUsers             AdminUser[]
+  amenities              Amenity[]
+  color                  Color?                   @relation(fields: [colorId], references: [id], onDelete: SetNull)
+  createdBy              SuperAdmin?              @relation("ApartmentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy              SuperAdmin?              @relation("ApartmentUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  appartmentClientUsers  ApartmentClientUser[]
+  adminPopUpBanners      ApartmentPopUpBanner[]
+  blocks                 Block[]
+  checkInOuts            CheckInOut[]
+  banners                ClientPopUpBanner[]
+  clientStaffs           ClientStaff[]
+  clientStaffsAttendance ClientStaffAttendance[]
+  clientStaffLogs        ClientStaffLog[]
+  DocumentFileClient     DocumentFileClient[]
+  documents              DocumentType[]           @relation("documentTypeApartmentRelation")
+  emergencyAlerts        EmergencyAlert[]
+  feedbacks              Feedback[]               @relation("feedbackApartmentRelation")
+  Flat                   Flat[]
+  flatCurrentClients     FlatCurrentClient[]
+  Floor                  Floor[]
+  folders                Folder[]
+  gatePasses             GatePass[]               @relation("GatePassToApartment")
+  groupEntries           GroupEntry[]
+  guardAttendances       GuardAttendance[]
+  guardShifts            GuardShift[]
+  guardUsers             GuardUser[]              @relation("GuardUserApartmentRelation")
+  notices                Notice[]
+  polls                  Poll[]
+  problems               Problem[]                @relation("problemApartmentRelation")
+  serviceProviders       ServiceProvider[]
+  serviceTypes           ServiceType[]
+  subscriptions          Subscription[]           @relation("subscriptionApartmentRelation")
+  surveillance           Surveillance[]
+  vehicleEntries         VehicleEntry[]
+  vehicleList            VehicleList[]
+  clientUsers            ClientUser[]             @relation("apartmenttoclientuser")
+  clientProblems         ClientProblem[]          @relation("ClientProblemApartmentRelation")
+
+  @@map("apartment")
+}
+
+model Block {
+  id                String             @id @default(uuid())
+  name              String
+  apartmentId       String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  createdById       String?
+  updatedById       String?
+  archive           Boolean            @default(false)
+  adminActivityLogs AdminActivityLog[] @relation("AdminActivityLogBlockRelation")
+  apartment         Apartment          @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy         AdminUser?         @relation("BlockCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy         AdminUser?         @relation("BlockUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  floors            Floor[]
+
+  @@map("block")
+}
+
+model Floor {
+  id          String     @id @default(uuid())
+  apartmentId String
+  name        String
+  blockId     String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdById String?
+  updatedById String?
+  archive     Boolean    @default(false)
+  flats       Flat[]
+  apartment   Apartment  @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  block       Block      @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser? @relation("FloorCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   AdminUser? @relation("FloorUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("floor")
+}
+
+model Flat {
+  id                   String                @id @default(uuid())
+  apartmentId          String
+  floorId              String
+  name                 String
+  type                 FlatTypeEnum
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  createdById          String?
+  updatedById          String?
+  archive              Boolean               @default(false)
+  apartmentClientUsers ApartmentClientUser[]
+  checkInOutRequests   CheckInOutRequest[]
+  notifications        ClientNotification[]
+  clientStaffLogs      ClientStaffLog[]
+  emergencyAlerts      EmergencyAlert[]
+  apartment            Apartment             @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy            AdminUser?            @relation("FlatCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  floor                Floor                 @relation(fields: [floorId], references: [id], onDelete: Cascade)
+  updatedBy            AdminUser?            @relation("FlatUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  currentClients       FlatCurrentClient[]
+  gatepasses           GatePass[]            @relation("GatePassToFlat")
+  guests               Guest[]               @relation("GuestToFlat")
+  guestMassPass        GuestMass[]           @relation("GuestMassToFlat")
+  maintenances         Maintenance[]
+  pets                 Pet[]
+  rides                Ride[]                @relation("RideToFlat")
+  ServiceUser          ServiceUser[]         @relation("ServiceUserToFlat")
+  vehicles             Vehicle[]
+  checkInOuts          CheckInOut[]          @relation("checkinouttoflat")
+  clientStaffs         ClientStaff[]         @relation("clientstafftoflat")
+  clientUsers          ClientUser[]          @relation("clientusertoflat")
+  deliveries           Delivery[]            @relation("deliverytoflat")
+
+  @@map("flat")
+}
+
+model Amenity {
+  id          String     @id @default(uuid())
+  apartmentId String
+  name        String
+  location    String
+  openTime    String?
+  always      Boolean?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdById String?
+  updatedById String?
+  archive     Boolean    @default(false)
+  closeTime   String?
+  apartment   Apartment  @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser? @relation("AmenityCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   AdminUser? @relation("AmenityUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  image       File?
+
+  @@map("amenity")
+}
+
+model Notice {
+  id          String     @id @default(uuid())
+  apartmentId String
+  title       String
+  category    String
+  message     String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdById String?
+  updatedById String?
+  archive     Boolean    @default(false)
+  document    File[]
+  apartment   Apartment  @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser? @relation("NoticeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   AdminUser? @relation("NoticeUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("notice")
+}
+
+model Poll {
+  id           String       @id @default(uuid())
+  apartmentId  String
+  title        String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  createdById  String?
+  updatedById  String?
+  archive      Boolean      @default(false)
+  countVisible Boolean      @default(false)
+  endAt        DateTime
+  apartment    Apartment    @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy    AdminUser?   @relation("PollCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy    AdminUser?   @relation("PollUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  pollAnswers  PollAnswer[]
+
+  @@map("poll")
+}
+
+model PollAnswer {
+  id        String       @id @default(uuid())
+  pollId    String
+  voteCount Int
+  title     String
+  createdAt DateTime     @default(now())
+  poll      Poll         @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  user      ClientUser[] @relation("pollanswercreatedby")
+
+  @@map("pollanswer")
+}
+
+model EmergencyAlert {
+  id            String             @id @default(uuid())
+  apartmentId   String
+  createdAt     DateTime           @default(now())
+  createdById   String
+  flatId        String
+  respondedAt   DateTime           @updatedAt
+  respondedById String?
+  type          EmergencyAlertType
+  history       Json
+  surveillance  String?
+  apartment     Apartment          @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy     ClientUser         @relation("EmergencyCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  flat          Flat               @relation(fields: [flatId], references: [id], onDelete: Cascade)
+  respondedBy   GuardUser?         @relation("EmergencyRespondedBy", fields: [respondedById], references: [id], onDelete: SetNull)
+
+  @@map("emergencyalert")
+}
+
+model DocumentType {
+  id                 String               @id @default(uuid())
+  name               String
+  atSignUp           Boolean              @default(false)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  createdById        String?
+  updatedById        String?
+  apartmentId        String
+  archive            Boolean              @default(false)
+  documentFileClient DocumentFileClient[]
+  apartment          Apartment            @relation("documentTypeApartmentRelation", fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy          AdminUser?           @relation("documentTypeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy          AdminUser?           @relation("documentTypeUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  files              File[]
+
+  @@map("documenttype")
+}
+
+model ServiceType {
+  id           String        @id @default(uuid())
+  name         String
+  apartmentId  String?
+  forAll       Boolean       @default(false)
+  userId       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  image        File?
+  apartment    Apartment?    @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  clientUser   ClientUser?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serviceUsers ServiceUser[]
+
+  @@map("servicetype")
+}
+
+model ServiceProvider {
+  id          String                  @id @default(uuid())
+  type        ServiceProviderTypeEnum
+  name        String
+  apartmentId String?
+  forAll      Boolean                 @default(false)
+  userId      String?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  deliveries  Delivery[]
+  image       File?
+  rides       Ride[]
+  apartment   Apartment?              @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  clientUser  ClientUser?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("serviceprovider")
+}
+
+model GatePass {
+  id              String        @id @default(uuid())
+  expired         Boolean       @default(false)
+  code            String        @unique
+  clientStaffId   String?       @unique
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  flatId          String?
+  backgroundImage String?
+  clientUserId    String?
+  guestId         String?       @unique
+  apartmentId     String?
+  adminServiceId  String?       @unique
+  guestMassId     String?       @unique
+  adminService    AdminService? @relation("AdminServiceGatePassRelation", fields: [adminServiceId], references: [id], onDelete: Cascade)
+  apartment       Apartment?    @relation("GatePassToApartment", fields: [apartmentId], references: [id], onDelete: Cascade)
+  clientStaff     ClientStaff?  @relation("ClientStaffGatePassRelation", fields: [clientStaffId], references: [id], onDelete: Cascade)
+  clientUser      ClientUser?   @relation(fields: [clientUserId], references: [id], onDelete: Cascade)
+  flat            Flat?         @relation("GatePassToFlat", fields: [flatId], references: [id], onDelete: Cascade)
+  guests          Guest?        @relation("GatePassToGuest", fields: [guestId], references: [id], onDelete: Cascade)
+  guestMass       GuestMass?    @relation("GatePassToGuestMass", fields: [guestMassId], references: [id], onDelete: Cascade)
+
+  @@map("gatepass")
+}
+
+model Background {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  image     String
+
+  @@map("background")
+}
+
+model VehicleList {
+  id             String         @id @default(uuid())
+  name           String
+  forAll         Boolean        @default(false)
+  apartmentId    String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  image          File?
+  vehicleEntries VehicleEntry[]
+  apartment      Apartment?     @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  @@map("vehiclelist")
+}
+
+model VehicleEntry {
+  id            String       @id @default(uuid())
+  vehicleId     String
+  name          String
+  contact       String
+  vehicleNumber String?
+  isFrequent    Boolean      @default(false)
+  apartmentId   String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  checkInOuts   CheckInOut[]
+  apartment     Apartment    @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  vehicle       VehicleList  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("vehicleentry")
+}
+
+model UserDevices {
+  id           Int            @id @default(autoincrement())
+  clientUserId String?
+  guardUserId  String?
+  deviceId     String
+  fcmToken     String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deviceType   DeviceTypeEnum @default(android)
+  clientUser   ClientUser?    @relation(fields: [clientUserId], references: [id], onDelete: Cascade)
+  guardUser    GuardUser?     @relation(fields: [guardUserId], references: [id], onDelete: Cascade)
+
+  @@map("userdevices")
+}

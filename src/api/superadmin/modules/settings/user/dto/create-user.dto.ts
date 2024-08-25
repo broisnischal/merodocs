@@ -1,0 +1,46 @@
+import { UserGenderEnum } from '@prisma/client';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'nestjs-zod/z';
+import { validateDateOfBirth } from 'src/common/utils/dob.utils';
+import { contactSchema } from 'src/common/validator/body.validator';
+
+export const createUserSchema = z
+  .object({
+    name: z
+      .string({ required_error: 'Name is required' })
+      .min(6, 'Name must contain at least 6 characters')
+      .max(60, 'Name cannot exceed 60 characters')
+      .transform((value) => {
+        return value.toLowerCase();
+      }),
+    roleId: z.string({ required_error: 'RoleId is required' }).uuid(),
+    email: z
+      .string({ required_error: 'Email is required' })
+      .email('Invalid email or malicious activities traced...')
+      .transform((value) => {
+        return value.toLowerCase();
+      }),
+    password: z
+      .string({ required_error: 'Password is required' })
+      .refine(
+        (value) =>
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+            value,
+          ),
+        {
+          message:
+            'Password must contain at least one uppercase letter, one digit and one special characters and have minimum 8 characters',
+        },
+      ),
+    cpassword: z.string({ required_error: 'Confirm Password is required' }),
+    gender: z.nativeEnum(UserGenderEnum, {
+      required_error: 'Gender is required',
+    }),
+    contact: contactSchema(),
+    dob: z
+      .string({ required_error: 'Date Of Birth is required' })
+      .transform(validateDateOfBirth),
+  })
+  .strict();
+
+export class createUserDto extends createZodDto(createUserSchema) {}
