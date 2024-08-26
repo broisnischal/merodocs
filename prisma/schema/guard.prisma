@@ -1,0 +1,240 @@
+model GuardUser {
+  id                        String              @id @default(uuid())
+  name                      String
+  email                     String?
+  gender                    UserGenderEnum
+  dob                       DateTime
+  contact                   String?
+  blockedToken              String?
+  token                     String[]
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
+  createdById               String?
+  updatedById               String?
+  archive                   Boolean             @default(false)
+  apartmentId               String
+  bloodgroup                BloodGroup
+  surveillanceId            String
+  shiftId                   String
+  passcode                  String
+  username                  String              @unique
+  defaultSurveillanceId     String?
+  checkInOutCreated         CheckInOut[]        @relation("CheckInOutGuardRelation")
+  checkInOutRequestApproved CheckInOutRequest[]
+  checkInOutRequestHanded   CheckInOutRequest[] @relation("HandedBy")
+  checkInOutRequestRejected CheckInOutRequest[] @relation("RejectedBy")
+  emergencyAlert            EmergencyAlert[]    @relation("EmergencyRespondedBy")
+  image                     File?
+  attendance                GuardAttendance[]
+  notifications             GuardNotification[]
+  apartment                 Apartment           @relation("GuardUserApartmentRelation", fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy                 AdminUser?          @relation("GuardCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  defaultSurveillance       Surveillance?       @relation("GuardUserDefaultServeillance", fields: [defaultSurveillanceId], references: [id], onDelete: SetNull)
+  shift                     GuardShift          @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  surveillance              Surveillance        @relation(fields: [surveillanceId], references: [id], onDelete: Cascade)
+  updatedBy                 AdminUser?          @relation("GuardUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  devices                   UserDevices[]
+
+  @@map("guarduser")
+}
+
+model GuardShift {
+  id          String      @id @default(uuid())
+  apartmentId String
+  name        String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  createdById String?
+  updatedById String?
+  archive     Boolean     @default(false)
+  start       DateTime    @db.Time(4)
+  end         DateTime    @db.Time(4)
+  apartment   Apartment   @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser?  @relation("ShiftCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   AdminUser?  @relation("ShiftUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  guardUsers  GuardUser[]
+
+  @@map("guardshift")
+}
+
+model Surveillance {
+  id          String       @id @default(uuid())
+  name        String
+  apartmentId String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  createdById String?
+  updatedById String?
+  archive     Boolean      @default(false)
+  checkInOuts CheckInOut[]
+  guards      GuardUser[]  @relation("GuardUserDefaultServeillance")
+  guardUsers  GuardUser[]
+  apartment   Apartment    @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser?   @relation("SurveillanceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   AdminUser?   @relation("SurveillanceUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("surveillance")
+}
+
+model GroupEntry {
+  id          String           @id @default(uuid())
+  name        String
+  contact     String
+  vehicleType VehicleTypeEnum?
+  apartmentId String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  description String?
+  isCreated   Boolean          @default(false)
+  groupId     String
+  checkInOuts CheckInOut[]
+  apartment   Apartment        @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  @@map("groupentry")
+}
+
+model CheckInOut {
+  id                String                      @id @default(uuid())
+  type              CheckInOutTypeEnum
+  requestType       CheckInOutRequestTypeEnum
+  createdByType     CheckInOutCreatedByTypeEnum
+  createdByGuardId  String?
+  createdByUserId   String?
+  surveillanceId    String?
+  vehicleNo         String?
+  vehicleType       VehicleTypeEnum?
+  image             String?
+  guestId           String?
+  deliveryId        String?
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+  rideId            String?
+  serviceId         String?
+  apartmentId       String
+  adminserviceId    String?
+  clientId          String?
+  clientStaffId     String?
+  flatJson          Json?
+  flatName          String[]
+  parentJson        Json?
+  flatArrayJson     Json?
+  guestMassId       String?
+  entered           Int?
+  vehicleId         String?
+  groupEntryId      String?
+  createdByUserType ClientUserType?
+  group             Boolean                     @default(false)
+  groupId           String?
+  adminService      AdminService?               @relation(fields: [adminserviceId], references: [id], onDelete: Cascade)
+  apartment         Apartment                   @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  client            ClientUser?                 @relation("CheckInOutClientRelation", fields: [clientId], references: [id], onDelete: Cascade)
+  clientStaff       ClientStaff?                @relation("CheckInOutClientStaffRelation", fields: [clientStaffId], references: [id], onDelete: Cascade)
+  createdByGuard    GuardUser?                  @relation("CheckInOutGuardRelation", fields: [createdByGuardId], references: [id], onDelete: SetNull)
+  createdByUser     ClientUser?                 @relation("CheckInOutUserRelation", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  delivery          Delivery?                   @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  groupEntry        GroupEntry?                 @relation(fields: [groupEntryId], references: [id], onDelete: Cascade)
+  guest             Guest?                      @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  guestMass         GuestMass?                  @relation(fields: [guestMassId], references: [id], onDelete: Cascade)
+  ride              Ride?                       @relation(fields: [rideId], references: [id], onDelete: Cascade)
+  service           ServiceUser?                @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  surveillance      Surveillance?               @relation(fields: [surveillanceId], references: [id], onDelete: SetNull)
+  vehicle           VehicleEntry?               @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  requests          CheckInOutRequest[]
+  flats             Flat[]                      @relation("checkinouttoflat")
+
+  @@map("checkinout")
+}
+
+model CheckInOutRequest {
+  id                String               @id @default(uuid())
+  checkInOutId      String
+  type              CheckInOutTypeEnum
+  status            CheckInOutStatusEnum @default(pending)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  approvedByUserId  String?
+  approvedByGuardId String?
+  rejectedByGuardId String?
+  flatId            String
+  collectedByUserId String?
+  isCollected       Boolean              @default(false)
+  handedByGuardId   String?
+  requestApprovedId String?
+  requestRejectedId String?
+  hasGuardCheckedIn Boolean              @default(false)
+  hasUserConfirmed  Boolean              @default(false)
+  hasGuardDenied    Boolean              @default(false)
+  approvedByGuard   GuardUser?           @relation(fields: [approvedByGuardId], references: [id], onDelete: SetNull)
+  rejectedByGuard   GuardUser?           @relation("RejectedBy", fields: [rejectedByGuardId], references: [id], onDelete: SetNull)
+  approvedByUser    ClientUser?          @relation(fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  checkInOut        CheckInOut           @relation(fields: [checkInOutId], references: [id], onDelete: Cascade)
+  collectedByUser   ClientUser?          @relation("CollectedBy", fields: [collectedByUserId], references: [id], onDelete: SetNull)
+  flat              Flat                 @relation(fields: [flatId], references: [id], onDelete: Cascade)
+  collectedByGuard  GuardUser?           @relation("HandedBy", fields: [handedByGuardId], references: [id], onDelete: SetNull)
+  requestApproved   ClientUser?          @relation("ApprovedBy", fields: [requestApprovedId], references: [id], onDelete: SetNull)
+  requestRejected   ClientUser?          @relation("RejectedByClient", fields: [requestRejectedId], references: [id], onDelete: SetNull)
+  parcelHistory     ParcelHistory[]
+
+  @@map("checkinoutrequest")
+}
+
+model ParcelHistory {
+  id        String            @id @default(uuid())
+  requestId String
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  status    ParcelHistoryEnum
+  request   CheckInOutRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@map("parcelhistory")
+}
+
+model GuardAttendance {
+  id             String              @id @default(uuid())
+  userId         String
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  shiftName      String
+  apartmentId    String
+  shiftEndTime   DateTime            @db.Time(4)
+  shiftStartTime DateTime            @db.Time(4)
+  date           String
+  apartment      Apartment           @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  user           GuardUser           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events         GuardClockedEvent[]
+
+  @@unique([userId, date], name: "dateIdentifier")
+  @@map("guardattendance")
+}
+
+model GuardClockedEvent {
+  id               String          @id @default(uuid())
+  attendanceId     String
+  surveillanceName String
+  clockedIn        Boolean         @default(false)
+  clockedOut       Boolean         @default(false)
+  duration         String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  clockedInTime    DateTime
+  clockedOutTime   DateTime?
+  attendance       GuardAttendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+
+  @@map("guardclockedevent")
+}
+
+model GuardNotification {
+  id          String                @id @default(uuid())
+  guardUserId String
+  title       String
+  body        String
+  type        GuardNotificationEnum
+  createdAt   DateTime              @default(now())
+  path        String
+  isRead      Boolean               @default(false)
+  clickable   Boolean               @default(true)
+  redirectId  String?
+  user        GuardUser             @relation(fields: [guardUserId], references: [id], onDelete: Cascade)
+
+  @@map("guardnotification")
+}

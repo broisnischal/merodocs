@@ -1,0 +1,297 @@
+model AdminPermission {
+  id          String          @id @default(uuid())
+  name        String
+  access      AccessRightEnum
+  roleId      String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  createdById String?
+  updatedById String?
+  createdBy   AdminUser?      @relation("PermissionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  role        AdminRole       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  updatedBy   AdminUser?      @relation("PermissionUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@unique([roleId, name], name: "permissionIdentifier")
+  @@map("adminpermission")
+}
+
+model AdminRole {
+  id          String            @id @default(uuid())
+  apartmentId String
+  name        String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  createdById String?
+  updatedById String?
+  archive     Boolean           @default(false)
+  permissions AdminPermission[]
+  apartment   Apartment         @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser?        @relation("AdminRoleCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   AdminUser?        @relation("AdminRoleUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  users       AdminUser[]
+
+  @@map("adminrole")
+}
+
+model AdminUser {
+  id                         String                @id @default(uuid())
+  apartmentId                String
+  roleId                     String
+  name                       String
+  gender                     UserGenderEnum
+  contact                    String
+  email                      String                @unique
+  password                   String
+  dob                        DateTime
+  token                      String[]
+  blockedToken               String?
+  archive                    Boolean               @default(false)
+  createdAt                  DateTime              @default(now())
+  updatedAt                  DateTime              @updatedAt
+  createdById                String?
+  updatedById                String?
+  firstLoggedIn              Boolean               @default(false)
+  bloodgroup                 BloodGroup?
+  hasLoggedIn                Boolean               @default(false)
+  shiftId                    String?
+  adminActivityLogs          AdminActivityLog[]    @relation("AdminActivityLogCreatedBy")
+  attendance                 AdminAttendance[]
+  permissionCreated          AdminPermission[]     @relation("PermissionCreatedBy")
+  permissionUpdated          AdminPermission[]     @relation("PermissionUpdatedBy")
+  roleCreated                AdminRole[]           @relation("AdminRoleCreatedBy")
+  roleUpdated                AdminRole[]           @relation("AdminRoleUpdatedBy")
+  adminServiceCreated        AdminService[]        @relation("AdminServiceCreatedBy")
+  adminServiceUpdated        AdminService[]        @relation("AdminServiceUpdatedBy")
+  adminServiceRolesCreated   AdminServiceRole[]    @relation("AdminServiceRoleCreatedBy")
+  adminServiceRolesUpdated   AdminServiceRole[]    @relation("AdminServiceRoleUpdatedBy")
+  adminServiceShiftCreated   AdminServiceShift[]   @relation("AdminServiceShiftCreatedBy")
+  adminServiceShiftUpdated   AdminServiceShift[]   @relation("AdminServiceShiftUpdatedBy")
+  adminShiftCreated          AdminShift[]          @relation("AdminShiftCreatedBy")
+  adminShiftUpdated          AdminShift[]          @relation("AdminShiftUpdatedBy")
+  apartment                  Apartment             @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy                  AdminUser?            @relation("AdminUserCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  adminUserCreated           AdminUser[]           @relation("AdminUserCreatedBy")
+  role                       AdminRole             @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  shift                      AdminShift?           @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  updatedBy                  AdminUser?            @relation("AdminUserUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  adminUserUpdated           AdminUser[]           @relation("AdminUserUpdatedBy")
+  amenityCreated             Amenity[]             @relation("AmenityCreatedBy")
+  amenityUpdated             Amenity[]             @relation("AmenityUpdatedBy")
+  apartmentClientUserUpdated ApartmentClientUser[] @relation("ApartmentClientUserUpdatedBy")
+  blockCreated               Block[]               @relation("BlockCreatedBy")
+  blockUpdated               Block[]               @relation("BlockUpdatedBy")
+  clientPopUpBannerCreated   ClientPopUpBanner[]   @relation("ClientPopUpBannerCreatedBy")
+  clientStaffApproved        ClientStaff[]
+  clientUserApproved         ClientUser[]
+  documentFiles              DocumentFile[]
+  documentCreatedBy          DocumentType[]        @relation("documentTypeCreatedBy")
+  documentUpdatedBy          DocumentType[]        @relation("documentTypeUpdatedBy")
+  feedbackCreated            Feedback[]            @relation("feedbackCreatedBy")
+  feedbackUpdated            Feedback[]            @relation("feedbackUpdatedBy")
+  image                      File?
+  filesCreated               File[]                @relation("FileCreatedByAdmin")
+  flatCreated                Flat[]                @relation("FlatCreatedBy")
+  flatUpdated                Flat[]                @relation("FlatUpdatedBy")
+  flatCurrentClientApproved  FlatCurrentClient[]
+  floorCreated               Floor[]               @relation("FloorCreatedBy")
+  floorUpdated               Floor[]               @relation("FloorUpdatedBy")
+  foldersCreated             Folder[]              @relation("AdminFolderCreatedBy")
+  foldersUpdated             Folder[]              @relation("AdminFolderUpdatedBy")
+  guardShiftsCreated         GuardShift[]          @relation("ShiftCreatedBy")
+  guardShiftsUpdated         GuardShift[]          @relation("ShiftUpdatedBy")
+  guardCreated               GuardUser[]           @relation("GuardCreatedBy")
+  guardUpdated               GuardUser[]           @relation("GuardUpdatedBy")
+  maintenanceUpdatedBy       Maintenance[]
+  maintenanceComments        MaintenanceComment[]  @relation("MaintenanceCommentRelation")
+  noticeCreated              Notice[]              @relation("NoticeCreatedBy")
+  noticeUpdated              Notice[]              @relation("NoticeUpdatedBy")
+  pollCreated                Poll[]                @relation("PollCreatedBy")
+  pollUpdated                Poll[]                @relation("PollUpdatedBy")
+  problemCreated             Problem[]             @relation("problemCreatedBy")
+  surveillanceCreated        Surveillance[]        @relation("SurveillanceCreatedBy")
+  urveillanceUpdated         Surveillance[]        @relation("SurveillanceUpdatedBy")
+
+  @@map("adminuser")
+}
+
+model AdminShift {
+  id          String      @id @default(uuid())
+  apartmentId String
+  name        String
+  start       DateTime    @db.Time(4)
+  end         DateTime    @db.Time(4)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  createdById String?
+  updatedById String?
+  archive     Boolean     @default(false)
+  apartment   Apartment   @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser?  @relation("AdminShiftCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   AdminUser?  @relation("AdminShiftUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  adminUser   AdminUser[]
+
+  @@map("adminshift")
+}
+
+model AdminNotification {
+  id          String                @id @default(uuid())
+  apartmentId String
+  message     String
+  type        AdminNotificationEnum
+  read        Boolean               @default(false)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  apartment   Apartment             @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  @@map("adminnotification")
+}
+
+model AdminServiceRole {
+  id            String         @id @default(uuid())
+  apartmentId   String
+  name          String
+  archive       Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  createdById   String?
+  updatedById   String?
+  adminServices AdminService[]
+  apartment     Apartment      @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy     AdminUser?     @relation("AdminServiceRoleCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy     AdminUser?     @relation("AdminServiceRoleUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("adminservicerole")
+}
+
+model AdminServiceShift {
+  id           String         @id @default(uuid())
+  apartmentId  String
+  name         String
+  start        DateTime       @db.Time(4)
+  end          DateTime       @db.Time(4)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  createdById  String?
+  updatedById  String?
+  archive      Boolean        @default(false)
+  serviceUsers AdminService[]
+  apartment    Apartment      @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy    AdminUser?     @relation("AdminServiceShiftCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy    AdminUser?     @relation("AdminServiceShiftUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("adminserviceshift")
+}
+
+model AdminService {
+  id          String                   @id @default(uuid())
+  apartmentId String
+  name        String
+  gender      UserGenderEnum?
+  contact     String
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  createdById String?
+  updatedById String?
+  archive     Boolean                  @default(false)
+  dob         DateTime
+  bloodgroup  BloodGroup
+  roleId      String
+  shiftId     String
+  passcode    String
+  apartment   Apartment                @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser?               @relation("AdminServiceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  role        AdminServiceRole         @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  shift       AdminServiceShift        @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  updatedBy   AdminUser?               @relation("AdminServiceUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  attendance  AdminServiceAttendance[]
+  checkInOuts CheckInOut[]
+  image       File?
+  gatePass    GatePass?                @relation("AdminServiceGatePassRelation")
+
+  @@map("adminservice")
+}
+
+model AdminServiceAttendance {
+  id             String                     @id @default(uuid())
+  userId         String
+  apartmentId    String
+  shiftStartTime DateTime                   @db.Time(4)
+  shiftEndTime   DateTime                   @db.Time(4)
+  shiftName      String
+  date           String
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+  apartment      Apartment                  @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  user           AdminService               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events         AdminServiceClockedEvent[]
+
+  @@unique([userId, date], name: "dateIdentifier")
+  @@map("adminserviceattendance")
+}
+
+model AdminServiceClockedEvent {
+  id               String                 @id @default(uuid())
+  attendanceId     String
+  surveillanceName String?
+  clockedInTime    DateTime
+  clockedOutTime   DateTime?
+  clockedIn        Boolean                @default(false)
+  clockedOut       Boolean                @default(false)
+  duration         String?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  attendance       AdminServiceAttendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+
+  @@map("adminserviceclockedevent")
+}
+
+model AdminActivityLog {
+  id          String     @id @default(uuid())
+  name        String
+  message     String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdById String?
+  apartmentId String
+  type        String
+  blockId     String?
+  apartment   Apartment  @relation("AdminActivityLogApartmentRelation", fields: [apartmentId], references: [id], onDelete: Cascade)
+  block       Block?     @relation("AdminActivityLogBlockRelation", fields: [blockId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser? @relation("AdminActivityLogCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@map("adminactivitylog")
+}
+
+model AdminAttendance {
+  id             String              @id @default(uuid())
+  userId         String
+  apartmentId    String
+  shiftStartTime DateTime            @db.Time(4)
+  shiftEndTime   DateTime            @db.Time(4)
+  shiftName      String
+  date           String
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  apartment      Apartment           @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  user           AdminUser           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events         AdminClockedEvent[]
+
+  @@unique([userId, date], name: "dateIdentifier")
+  @@map("adminattendance")
+}
+
+model AdminClockedEvent {
+  id               String          @id @default(uuid())
+  attendanceId     String
+  clockedInTime    DateTime
+  clockedOutTime   DateTime?
+  clockedIn        Boolean         @default(false)
+  clockedOut       Boolean         @default(false)
+  duration         String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  surveillanceName String
+  attendance       AdminAttendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+
+  @@map("adminclockedevent")
+}

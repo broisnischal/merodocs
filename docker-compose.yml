@@ -1,0 +1,39 @@
+services:
+  local:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      # Only will build development stage from our dockerfile
+      target: deps
+    env_file:
+      - ./.env
+    volumes:
+      - .:/usr/src/app
+    command: npm run dev
+    ports:
+      - ${PORT}:${PORT}
+
+  dev:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      # Only will build development stage from our dockerfile
+      target: runner
+    env_file:
+      - ./.env
+    command: npm run start
+    ports:
+      - ${PORT}:${PORT}
+
+  prod:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: runner
+    environment:
+      - PORT=5456
+    env_file:
+      - ./.env
+    command: npm run start
+    ports:
+      - ${PORT}:${PORT}

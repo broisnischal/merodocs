@@ -1,0 +1,331 @@
+enum FolderTypeEnum {
+  document
+  gallery
+}
+
+enum FolderAccessEnum {
+  public
+  private
+}
+
+enum FileTypeEnum {
+  image
+  media
+  docs
+  others
+}
+
+enum AccessRightEnum {
+  readonly
+  readwriteanddelete
+}
+
+enum UserGenderEnum {
+  male
+  female
+  other
+}
+
+enum PayStatus {
+  due
+  paid
+  free_trial
+}
+
+enum ApartmentStatus {
+  active
+  inactive
+  expired
+}
+
+enum PackageTypeEnum {
+  free
+  paid
+}
+
+enum PaymentTimeEnum {
+  annually
+  semiannually
+  quaterly
+}
+
+enum PaymentPatternEnum {
+  single
+  installment
+}
+
+enum SubscriptionStatus {
+  active
+  expired
+}
+
+enum SuperAdminNotificationEnum {
+  expiring_soon
+  report_issued_client
+  report_issued_apartment
+  inactive_account
+}
+
+enum BloodGroup {
+  a_positive
+  a_negative
+  b_positive
+  b_negative
+  ab_positive
+  ab_negative
+  o_positive
+  o_negative
+}
+
+enum AdminNotificationEnum {
+  account_creation_request
+  add_flat_request
+  move_out_request
+  maintenance_ticket
+  recent_poll
+}
+
+enum FlatTypeEnum {
+  OneRK
+  TwoRK
+  OneBHK
+  TwoBHK
+  ThreeBHK
+  FourBHK
+  None
+}
+
+enum EmergencyAlertType {
+  Fire
+  Threat
+  Medical
+  Lift_Emergency
+  Robbery
+  Others
+}
+
+enum ProblemStatus {
+  pending
+  valid_issue
+  working_on_it
+  ticket_closed
+  inappropriate_issue
+}
+
+enum ClientUserType {
+  owner
+  owner_family
+  tenant
+  tenant_family
+}
+
+enum DeviceTypeEnum {
+  android
+  ios
+}
+
+enum ApartmentClientUserStatusEnum {
+  pending
+  approved
+  rejected
+  cancelled
+}
+
+enum MainUserType {
+  admin
+  owner
+  tenant
+}
+
+enum ClientUserRequestTypeEnum {
+  moveIn
+  moveOut
+  addAccount
+  becomeOwner
+}
+
+enum RequestVerifiedTypeEnum {
+  owner
+  tenant
+}
+
+enum ClientStaffStatus {
+  approved
+  pending
+  rejected
+}
+
+enum ClientUserTopType {
+  owner
+  tenant
+}
+
+enum PetTypesEnum {
+  dog
+  cat
+  bird
+  others
+}
+
+enum VehicleTypeEnum {
+  two_wheeler
+  four_wheeler
+}
+
+enum CheckTypeEnum {
+  preapproved
+  manual
+}
+
+enum ServiceProviderTypeEnum {
+  delivery
+  ride
+}
+
+enum MaintenanceTypeEnum {
+  public
+  private
+}
+
+enum MaintenanceStatus {
+  pending
+  open
+  closed
+}
+
+enum CommentTypeEnum {
+  admin
+  client
+}
+
+enum CheckInOutStatusEnum {
+  pending
+  approved
+  rejected
+  noresponse
+}
+
+enum CheckInOutTypeEnum {
+  checkin
+  checkout
+  parcel
+}
+
+enum CheckInOutRequestTypeEnum {
+  guest
+  delivery
+  service
+  ride
+  adminservice
+  client
+  clientstaff
+  guestmass
+  vehicle
+  group
+}
+
+enum CheckInOutCreatedByTypeEnum {
+  guard
+  user
+}
+
+enum ParcelHistoryEnum {
+  collected
+  confirmed
+}
+
+enum GuardNotificationEnum {
+  guest
+  rider
+  delivery
+  parcel
+  service
+  sos
+}
+
+enum ClientNotificationEnum {
+  notice
+  polls
+  sos
+  guest
+  delivery
+  parcel
+  ride
+  service
+  clientstaff
+  request
+}
+
+enum ClientNotificationLogoEnum {
+  none
+  in
+  out
+  approved
+  rejected
+  ride
+  delivery
+  service
+  parcel
+  guest
+  sos
+}
+
+enum HomeEnum {
+  forResident
+  forGuard
+  forManagement
+}
+
+enum NPCEnum {
+  notice
+  poll
+  complaint
+}
+
+enum SocietyEnum {
+  forResident
+  forManagement
+}
+
+enum ManagementPlatformTypeEnum {
+  resident_management
+  apartment_management
+  visitor_management
+}
+
+enum VideoEnum {
+  forResident
+  forHome
+  forSecurity
+}
+
+enum ContactUsStatusEnum {
+  pending
+  responded
+}
+
+enum ContactUsRoleEnum {
+  PropertyManager
+  Resident
+  PropertyDeveloper
+  FacilitiesManager
+  Other
+}
+
+enum FAQTypeEnum {
+  home_page
+  for_resident
+  for_guard
+  for_management
+}
+
+enum LegalComplianceTypeEnum {
+  terms_and_conditions
+  privacy_policy
+}
+
+enum BlogStatusEnum {
+  published
+  draft
+  scheduled
+}
